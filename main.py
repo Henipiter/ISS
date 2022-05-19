@@ -1,6 +1,8 @@
 import streamlit as st
 from matplotlib import pyplot as plt
 import model
+import pandas as pd
+import numpy as np
 
 
 def get_states_variables(variable, default):
@@ -9,19 +11,28 @@ def get_states_variables(variable, default):
 
 
 compare_mode = st.sidebar.checkbox('Compare mode')
+plot_bool = st.sidebar.checkbox('Plot')
 
 
 def plot_and_write(data, color='ro'):
-    fig = plt.figure()
-    plt.plot(data[0], data[1], color)
-    st.write(fig)
+    if (plot_bool):
+        fig = plt.figure()
+        plt.plot(data[0], data[1], color)
+        st.write(fig)
+    else:
+        chart_data = pd.DataFrame(data[1], index=data[0])
+        st.line_chart(chart_data, use_container_width=True)
 
 
 def two_plots_and_write(data1, data2, color1='ro', color2='bo'):
-    fig = plt.figure()
-    plt.plot(data1[0], data1[1], color1)
-    plt.plot(data2[0], data2[1], color2)
-    st.write(fig)
+    if (plot_bool):
+        fig = plt.figure()
+        plt.plot(data1[0], data1[1], color1)
+        plt.plot(data2[0], data2[1], color2)
+        st.write(fig)
+    else:
+        chart_data = pd.DataFrame(list(zip(data1[1], data2[1])), index=data1[0])
+        st.line_chart(chart_data, use_container_width=True)
 
 
 def draw_in_compare_mode():
@@ -50,7 +61,6 @@ def draw_in_compare_mode():
         plot_and_write(model.get_plot_data(freq), 'ro')
     with compared_plot_column:
         plot_and_write(model.get_plot_data(float(freeze_freq)), 'bo')
-
 
 
 def draw_in_normal_mode():
