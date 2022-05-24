@@ -55,8 +55,8 @@ def draw_in_compare_mode():
 
     with original_slider_column:
         st.error("Original")
-        freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 5.0, freeze_original)
-        another = set_sliders(sh.SLIDER_NAME_ANOTHER, 5.0, freeze_original)
+        freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0, freeze_original)
+        another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4, freeze_original)
 
     with compared_slider_column:
         st.info("Froze")
@@ -68,10 +68,10 @@ def draw_in_compare_mode():
 
 
 def draw_in_normal_mode():
-    freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 5.0)
-    another = set_sliders(sh.SLIDER_NAME_ANOTHER, 5.0)
+    freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0)
+    another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4)
     sh.set_states_variables([freq, another])
-    plot_and_write(model.get_plot_data(freq))
+    plot_and_write(model.get_plot_data(freq, another))
 
 
 def draw():
