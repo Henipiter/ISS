@@ -1,7 +1,6 @@
 from math import sqrt
 
 import numpy as np
-import streamlit as st
 
 
 def h_var_increment(hn, Tp, A, Qdn, B):
@@ -39,9 +38,9 @@ def get_Ys(N, Tp, a1, a2, a3, b1, b2, b3, Kp, Ki, Kd):
         u.append(is_in_range(u_pid(uchyby, Kp, Ki, Kd), -1.0, 1.0))
     return ys
 
-def get_plot_data(freq,another):
-    Kp = freq
-    Kd = another
+def get_plot_data(kp,kd, ki):
+    Kp = kp
+    Kd = kd
     tab = get_Ys(N, Tp, a1, a2, a3, b1, b2, b3, Kp, Ki, Kd)
     print("Wartość ustalona wychylenia: " + str(tab[N]) + " rad")
 

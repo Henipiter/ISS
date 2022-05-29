@@ -9,10 +9,9 @@ st.sidebar.button('Refresh')
 compare_mode = st.sidebar.checkbox('Compare mode')
 
 
-def set_sliders(name, current_value, disabled=False):
+def set_sliders(name, current_value, disabled=False, compared=False):
     i = sh.values_for_sliders()[name]
-    label = name
-    print(label)
+    label = name + " compared" if compared else name
     min_value = i[sh.SLIDER_MIN_VALUE]
     max_value = i[sh.SLIDER_MAX_VALUE]
     step = i[sh.SLIDER_STEP_VALUE]
@@ -55,27 +54,30 @@ def draw_in_compare_mode():
 
     with original_slider_column:
         st.error("Original")
-        freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0, freeze_original)
-        another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4, freeze_original)
+        kp = set_sliders(sh.SLIDER_NAME_KP, 2.0, freeze_original)
+        kd = set_sliders(sh.SLIDER_NAME_KD, 1.4, freeze_original)
+        ki = set_sliders(sh.SLIDER_NAME_KI, 1.4, freeze_original)
 
     with compared_slider_column:
         st.info("Compare")
-        frozen_variables = sh.get_variables_for_frozen()
-        freeze_freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, frozen_variables[0], False, True)
-        freeze_another = set_sliders(sh.SLIDER_NAME_ANOTHER, frozen_variables[1], False, True)
+        compared_variables = sh.get_variables_for_compared()
+        compared_kp = set_sliders(sh.SLIDER_NAME_KP, compared_variables[0], False, True)
+        compared_kd = set_sliders(sh.SLIDER_NAME_KD, compared_variables[1], False, True)
+        compared_ki = set_sliders(sh.SLIDER_NAME_KI, compared_variables[2], False, True)
 
-    two_plots_and_write(get_data_for_draw(freq, another), get_data_for_draw(freeze_freq, freeze_another))
+    two_plots_and_write(get_data_for_draw(kp, kd, ki), get_data_for_draw(compared_kp, compared_kd, compared_ki))
 
 
 def draw_in_normal_mode():
-    freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0)
-    another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4)
-    sh.set_states_variables([freq, another])
-    plot_and_write(get_data_for_draw(freq, another))
+    kp = set_sliders(sh.SLIDER_NAME_KP, 2.0)
+    kd = set_sliders(sh.SLIDER_NAME_KD, 1.4)
+    ki = set_sliders(sh.SLIDER_NAME_KI, 1.4)
+    sh.set_states_variables([kp, kd, ki])
+    plot_and_write(get_data_for_draw(kp, kd, ki))
 
 
-def get_data_for_draw(freq, another):
-    return model.get_plot_data(freq, another)
+def get_data_for_draw(kp, kd, ki):
+    return model.get_plot_data(kp, kd, ki)
 
 
 def draw():
