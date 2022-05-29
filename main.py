@@ -9,9 +9,9 @@ st.sidebar.button('Refresh')
 compare_mode = st.sidebar.checkbox('Compare mode')
 
 
-def set_sliders(name, current_value, disabled=False, frozen=False):
+def set_sliders(name, current_value, disabled=False):
     i = sh.values_for_sliders()[name]
-    label = name + " frozen" if frozen else name
+    label = name
     print(label)
     min_value = i[sh.SLIDER_MIN_VALUE]
     max_value = i[sh.SLIDER_MAX_VALUE]
@@ -41,9 +41,9 @@ def plot_and_write(data):
 
 
 def two_plots_and_write(data1, data2):
-    df = pd.DataFrame(dict(x=data1[0], Original=data1[1], Froze=data2[1]))
-    fig = px.line(df, x="x", y=["Original", "Froze"],
-                  color_discrete_map={"Original": "red", "Froze": "blue"})
+    df = pd.DataFrame(dict(x=data1[0], Original=data1[1], Compare=data2[1]))
+    fig = px.line(df, x="x", y=["Original", "Compare"],
+                  color_discrete_map={"Original": "red", "Compare": "blue"})
 
     update_layout_plot(fig, "x", "y", True)
     st.write(fig)
@@ -59,19 +59,23 @@ def draw_in_compare_mode():
         another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4, freeze_original)
 
     with compared_slider_column:
-        st.info("Froze")
+        st.info("Compare")
         frozen_variables = sh.get_variables_for_frozen()
         freeze_freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, frozen_variables[0], False, True)
         freeze_another = set_sliders(sh.SLIDER_NAME_ANOTHER, frozen_variables[1], False, True)
 
-    two_plots_and_write(model.get_plot_data(freq), model.get_plot_data(freeze_freq))
+    two_plots_and_write(get_data_for_draw(freq, another), get_data_for_draw(freeze_freq, freeze_another))
 
 
 def draw_in_normal_mode():
     freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0)
     another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4)
     sh.set_states_variables([freq, another])
-    plot_and_write(model.get_plot_data(freq, another))
+    plot_and_write(get_data_for_draw(freq, another))
+
+
+def get_data_for_draw(freq, another):
+    return model.get_plot_data(freq, another)
 
 
 def draw():
