@@ -5,14 +5,14 @@ import streamlit as st
 import model
 import slider_helper as sh
 
+invert_plots = False
 st.sidebar.button('Refresh')
 compare_mode = st.sidebar.checkbox('Compare mode')
 
 
-def set_sliders(name, current_value, disabled=False, frozen=False):
+def set_sliders(name, current_value, disabled=False, compared=False):
     i = sh.values_for_sliders()[name]
-    label = name + " frozen" if frozen else name
-    print(label)
+    label = name + " compared" if compared else name
     min_value = i[sh.SLIDER_MIN_VALUE]
     max_value = i[sh.SLIDER_MAX_VALUE]
     step = i[sh.SLIDER_STEP_VALUE]
@@ -38,12 +38,17 @@ def plot_and_write(data):
     fig = px.line(df, x="x", y=["y"], color_discrete_map={"y": "red"})
     update_layout_plot(fig, "x", "y", False)
     st.write(fig)
+    st.write("Wartość ustalona: ", data[1][-1])
 
 
 def two_plots_and_write(data1, data2):
-    df = pd.DataFrame(dict(x=data1[0], Original=data1[1], Froze=data2[1]))
-    fig = px.line(df, x="x", y=["Original", "Froze"],
-                  color_discrete_map={"Original": "red", "Froze": "blue"})
+    global invert_plots
+    invert_plots = st.sidebar.checkbox('Invert plots')
+
+    df = pd.DataFrame(dict(x=data1[0], Original=data1[1], Compare=data2[1]))
+    y = ["Original", "Compare"] if invert_plots else ["Compare", "Original"]
+    fig = px.line(df, x="x", y=y,
+                  color_discrete_map={"Original": "red", "Compare": "blue"})
 
     update_layout_plot(fig, "x", "y", True)
     st.write(fig)
@@ -55,23 +60,36 @@ def draw_in_compare_mode():
 
     with original_slider_column:
         st.error("Original")
-        freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0, freeze_original)
-        another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4, freeze_original)
+        kp = set_sliders(sh.SLIDER_NAME_KP, 2.0, freeze_original)
+        kd = set_sliders(sh.SLIDER_NAME_KD, 1.4, freeze_original)
+        ki = set_sliders(sh.SLIDER_NAME_KI, 1.4, freeze_original)
 
     with compared_slider_column:
-        st.info("Froze")
-        frozen_variables = sh.get_variables_for_frozen()
-        freeze_freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, frozen_variables[0], False, True)
-        freeze_another = set_sliders(sh.SLIDER_NAME_ANOTHER, frozen_variables[1], False, True)
+        st.info("Compare")
+        compared_variables = sh.get_variables_for_compared()
+        compared_kp = set_sliders(sh.SLIDER_NAME_KP, compared_variables[0], False, True)
+        compared_kd = set_sliders(sh.SLIDER_NAME_KD, compared_variables[1], False, True)
+        compared_ki = set_sliders(sh.SLIDER_NAME_KI, compared_variables[2], False, True)
+    ori_data = get_data_for_draw(kp, kd, ki)
+    compared_data = get_data_for_draw(compared_kp, compared_kd, compared_ki)
+    two_plots_and_write(ori_data, compared_data)
 
-    two_plots_and_write(model.get_plot_data(freq), model.get_plot_data(freeze_freq))
+    with original_slider_column:
+        st.write("Wartosc ustalona: ", ori_data[1][-1])
+    with compared_slider_column:
+        st.write("Wartosc ustalona: ", compared_data[1][-1])
 
 
 def draw_in_normal_mode():
-    freq = set_sliders(sh.SLIDER_NAME_FREQUENCY, 2.0)
-    another = set_sliders(sh.SLIDER_NAME_ANOTHER, 1.4)
-    sh.set_states_variables([freq, another])
-    plot_and_write(model.get_plot_data(freq, another))
+    kp = set_sliders(sh.SLIDER_NAME_KP, 2.0)
+    kd = set_sliders(sh.SLIDER_NAME_KD, 1.4)
+    ki = set_sliders(sh.SLIDER_NAME_KI, 1.4)
+    sh.set_states_variables([kp, kd, ki])
+    plot_and_write(get_data_for_draw(kp, kd, ki))
+
+
+def get_data_for_draw(kp, kd, ki):
+    return model.get_plot_data(kp, kd, ki)
 
 
 def draw():
