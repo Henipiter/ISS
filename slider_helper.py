@@ -48,9 +48,9 @@ def values_for_sliders():
             SLIDER_MAX_VALUE: 5.0
         },
         SLIDER_NAME_KI: {
-            SLIDER_STEP_VALUE: 0.1,
+            SLIDER_STEP_VALUE: 0.01,
             SLIDER_MIN_VALUE: 0.0,
-            SLIDER_MAX_VALUE: 5.0
+            SLIDER_MAX_VALUE: 1.0
         }
     }
 
