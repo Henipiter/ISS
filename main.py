@@ -98,10 +98,15 @@ def draw_in_compare_mode():
 
 
 def draw_in_normal_mode():
-    kp = set_sliders(sh.SLIDER_NAME_KP, 2.0)
-    kd = set_sliders(sh.SLIDER_NAME_KD, 1.4)
-    ki = set_sliders(sh.SLIDER_NAME_KI, 1.4)
-    sh.set_states_variables([kp, kd, ki])
+    if not fuzzy_mode:
+        kp = set_sliders(sh.SLIDER_NAME_KP, 0.5)
+        kd = set_sliders(sh.SLIDER_NAME_KD, 1.7)
+        ki = set_sliders(sh.SLIDER_NAME_KI, 0.08)
+        sh.set_states_variables([kp, kd, ki])
+    else:
+        kp = 0
+        kd = 0
+        ki = 0
     plot_and_write(get_data_for_draw(kp, kd, ki))
 
 
