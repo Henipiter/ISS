@@ -7,7 +7,19 @@ import slider_helper as sh
 
 invert_plots = False
 st.sidebar.button('Refresh')
-compare_mode = st.sidebar.checkbox('Compare mode')
+fuzzy_mode = st.sidebar.checkbox('Fuzzy')
+
+if not fuzzy_mode:
+    compare_mode = st.sidebar.checkbox('Compare mode')
+else:
+    compare_mode = False
+
+
+def get_y_of_ustalona(length):
+    y = []
+    for i in range(length):
+        y.append(2)
+    return y
 
 
 def set_sliders(name, current_value, disabled=False, compared=False):
@@ -34,21 +46,24 @@ def update_layout_plot(fig, xaxis_title, yaxis_title, showlegend):
 
 
 def plot_and_write(data):
-    df = pd.DataFrame(dict(x=data[0], y=data[1]))
-    fig = px.line(df, x="x", y=["y"], color_discrete_map={"y": "red"})
+    z = get_y_of_ustalona(len(data[0]))
+    df = pd.DataFrame(dict(x=data[0], y=data[1], Zadana=z))
+    fig = px.line(df, x="x", y=["Zadana", "y"], color_discrete_map={"Zadana": "yellow", "y": "red"})
+
     update_layout_plot(fig, "x", "y", False)
     st.write(fig)
     st.write("Wartość ustalona: ", data[1][-1])
+    st.write("Tp:", 0.1)
 
 
 def two_plots_and_write(data1, data2):
     global invert_plots
     invert_plots = st.sidebar.checkbox('Invert plots')
-
-    df = pd.DataFrame(dict(x=data1[0], Original=data1[1], Compare=data2[1]))
-    y = ["Original", "Compare"] if invert_plots else ["Compare", "Original"]
+    z = get_y_of_ustalona(len(data1[0]))
+    df = pd.DataFrame(dict(x=data1[0], Original=data1[1], Compare=data2[1], Zadana=z))
+    y = ["Zadana", "Original", "Compare"] if invert_plots else ["Zadana", "Compare", "Original"]
     fig = px.line(df, x="x", y=y,
-                  color_discrete_map={"Original": "red", "Compare": "blue"})
+                  color_discrete_map={"Original": "red", "Compare": "blue", "Zadana": "yellow"})
 
     update_layout_plot(fig, "x", "y", True)
     st.write(fig)
@@ -60,9 +75,9 @@ def draw_in_compare_mode():
 
     with original_slider_column:
         st.error("Original")
-        kp = set_sliders(sh.SLIDER_NAME_KP, 2.0, freeze_original)
-        kd = set_sliders(sh.SLIDER_NAME_KD, 1.4, freeze_original)
-        ki = set_sliders(sh.SLIDER_NAME_KI, 1.4, freeze_original)
+        kp = set_sliders(sh.SLIDER_NAME_KP, 0.5, freeze_original)
+        kd = set_sliders(sh.SLIDER_NAME_KD, 1.7, freeze_original)
+        ki = set_sliders(sh.SLIDER_NAME_KI, 0.08, freeze_original)
 
     with compared_slider_column:
         st.info("Compare")
@@ -76,8 +91,10 @@ def draw_in_compare_mode():
 
     with original_slider_column:
         st.write("Wartosc ustalona: ", ori_data[1][-1])
+        st.write("Tp:", 0.1)
     with compared_slider_column:
         st.write("Wartosc ustalona: ", compared_data[1][-1])
+        st.write("Tp:", 0.1)
 
 
 def draw_in_normal_mode():
@@ -89,7 +106,7 @@ def draw_in_normal_mode():
 
 
 def get_data_for_draw(kp, kd, ki):
-    return model.get_plot_data(kp, kd, ki)
+    return model.get_plot_data(kp, kd, ki, fuzzy_mode)
 
 
 def draw():

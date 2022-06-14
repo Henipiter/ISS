@@ -92,13 +92,15 @@ def get_Ys_fuzzy(N, Tp, a1, a2, a3, b1, b2, b3):
     return ys
 
 
-def get_plot_data(kp, kd, ki):
-    Kp = kp
-    Kd = kd
-    Ki = ki
+def get_plot_data(kp, kd, ki, is_fuzzy):
 
-    # tab = get_Ys_pid(N, Tp, a1, a2, a3, b1, b2, b3, Kp, Ki, Kd)
-    tab = get_Ys_fuzzy(N, Tp, a1, a2, a3, b1, b2, b3)
+    if is_fuzzy:
+        tab = get_Ys_fuzzy(N, Tp, a1, a2, a3, b1, b2, b3)
+    else:
+        Kp = kp
+        Kd = kd
+        Ki = ki
+        tab = get_Ys_pid(N, Tp, a1, a2, a3, b1, b2, b3, Kp, Ki, Kd)
 
     print("Wartość ustalona wychylenia: " + str(tab[N]) + " rad")
 
