@@ -43,30 +43,37 @@ def setup_fuzzy():
     FS = sf.FuzzySystem()
 
     # Define a linguistic variable.
-    S_1 = sf.FuzzySet(points=[[-5., 1.], [0., 0.], [5., 0.]], term="low_flow")
-    S_2 = sf.FuzzySet(points=[[-5., 0], [-1., 0], [0., 1.], [1., 0.], [5., 0]], term="medium_flow")
-    S_3 = sf.FuzzySet(points=[[-5., 0], [0., 0.], [5., 1.]], term="high_flow")
-    FS.add_linguistic_variable("OXI", sf.LinguisticVariable([S_1, S_2, S_3]))
+    SET_P_1 = sf.FuzzySet(points=[[-5., 1.], [0., 0.], [5., 0.]], term="low_flow")
+    SET_P_2 = sf.FuzzySet(points=[[-5., 0], [-1., 0], [0., 1.], [1., 0.], [5., 0]], term="medium_flow")
+    SET_P_3 = sf.FuzzySet(points=[[-5., 0], [0., 0.], [5., 1.]], term="high_flow")
+    FS.add_linguistic_variable("P_REG", sf.LinguisticVariable([SET_P_1, SET_P_2, SET_P_3]))
+
+    SET_D_1 = sf.FuzzySet(points=[[-5., 1.], [0., 0.], [5., 0.]], term="low_flow")
+    SET_D_2 = sf.FuzzySet(points=[[-5., 0], [-0.5, 0], [0., 1.], [0.5, 0.], [5., 0]], term="medium_flow")
+    SET_D_3 = sf.FuzzySet(points=[[-5., 0], [0., 0.], [5., 1.]], term="high_flow")
+    FS.add_linguistic_variable("D_REG", sf.LinguisticVariable([SET_D_1, SET_D_2, SET_D_3]))
 
     # Define consequents.
-    FS.set_crisp_output_value("LOW_POWER", -1)
-    FS.set_crisp_output_value("MEDIUM_POWER", 0)
-    FS.set_crisp_output_value("HIGH_POWER", 1)
-    FS.set_output_function("HIGH_FUN", "OXI**2")
+    FS.set_crisp_output_value("POWER_0", -1)
+    FS.set_crisp_output_value("POWER_1", -0.5)
+    FS.set_crisp_output_value("POWER_2", 0)
+
+    FS.set_crisp_output_value("POWER_3", 0.5)
+    FS.set_crisp_output_value("POWER_4", 1)
 
     # Define fuzzy rules.
-    RULE1 = "IF (OXI IS low_flow) THEN (POWER IS LOW_POWER)"
-    RULE2 = "IF (OXI IS medium_flow) THEN (POWER IS MEDIUM_POWER)"
-    RULE3 = "IF (OXI IS high_flow) THEN (POWER IS HIGH_POWER)"
-    # RULE4 = "IF (NOT (OXI IS low_flow)) THEN (POWER IS HIGH_FUN)"
-    FS.add_rules([RULE1, RULE2, RULE3])
-
+    RULE_P1 = "IF (P_REG IS low_flow) AND (D_REG IS low_flow) THEN (POWER IS POWER_0)"
+    RULE_P2 = "IF (P_REG IS low_flow) AND (D_REG IS medium_flow) THEN (POWER IS POWER_1)"
+    RULE_P3 = "IF (P_REG IS medium_flow) AND (D_REG IS medium_flow) THEN (POWER IS POWER_2)"
+    RULE_P4 = "IF (P_REG IS high_flow) AND (D_REG IS medium_flow) THEN (POWER IS POWER_3)"
+    RULE_P5 = "IF (P_REG IS high_flow) AND (D_REG IS high_flow) THEN (POWER IS POWER_4)"
+    FS.add_rules([RULE_P1, RULE_P2, RULE_P3, RULE_P4, RULE_P5])
     return FS
-    # Set antecedents values, perform Sugeno inference and print output values.
 
 
-def calculate_fuzzy(FS, uchyb):
-    FS.set_variable("OXI", uchyb)
+def calculate_fuzzy(FS, uchyb, roznica):
+    FS.set_variable("P_REG", uchyb)
+    FS.set_variable("D_REG", roznica)
     return FS.Sugeno_inference(['POWER'])["POWER"]
 
 
@@ -75,11 +82,13 @@ def get_Ys_fuzzy(N, Tp, a1, a2, a3, b1, b2, b3):
     u = [0., 0., 0.]
     FS = setup_fuzzy()
     for iiiiii in range(1, N):
+        print("[", str(iiiiii), "/" + str(N) + "]")
         ys.append(h_var_increment2(ys[-1], ys[-2], ys[-3], u[-1], u[-2], u[-3], a1, a2, a3, b1, b2, b3))
         uchyby = []
         for j in range(len(ys)):
             uchyby.append(h - ys[j])
-            u.append(calculate_fuzzy(FS, uchyby[j]))
+        for j in range(len(ys)):
+            u.append(calculate_fuzzy(FS, uchyby[j], uchyby[j] - uchyby[j - 1]))
     return ys
 
 
