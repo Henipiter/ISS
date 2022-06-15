@@ -54,12 +54,12 @@ def setup_fuzzy():
     FS.add_linguistic_variable("D_REG", sf.LinguisticVariable([SET_D_1, SET_D_2, SET_D_3]))
 
     # Define consequents.
-    FS.set_crisp_output_value("POWER_0", -1)
-    FS.set_crisp_output_value("POWER_1", -0.5)
+    FS.set_crisp_output_value("POWER_0", -0.5)
+    FS.set_crisp_output_value("POWER_1", -0.25)
     FS.set_crisp_output_value("POWER_2", 0)
 
-    FS.set_crisp_output_value("POWER_3", 0.5)
-    FS.set_crisp_output_value("POWER_4", 1)
+    FS.set_crisp_output_value("POWER_3", 0.25)
+    FS.set_crisp_output_value("POWER_4", 0.5)
 
     # Define fuzzy rules.
     RULE_P1 = "IF (P_REG IS low_flow) AND (D_REG IS low_flow) THEN (POWER IS POWER_0)"
@@ -87,9 +87,22 @@ def get_Ys_fuzzy(N, Tp, a1, a2, a3, b1, b2, b3):
         uchyby = []
         for j in range(len(ys)):
             uchyby.append(h - ys[j])
+
+        # last_fuzzy_val = calculate_fuzzy(FS, uchyby[-1], uchyby[-1] - uchyby[-2])
         for j in range(len(ys)):
-            u.append(calculate_fuzzy(FS, uchyby[j], uchyby[j] - uchyby[j - 1]))
+            current_fuzzy_val = calculate_fuzzy(FS, uchyby[j], uchyby[j] - uchyby[j - 1])
+            current_fuzzy_val = get_right_value(u[-1] + current_fuzzy_val)/4
+            u.append(current_fuzzy_val)
+
+    for ggg in range(len(ys)):
+        ys[ggg] = ys[ggg]*1.736
     return ys
+
+
+def get_right_value(val):
+    val = max(val, 0)
+    val = min(1, val)
+    return val
 
 
 def get_plot_data(kp, kd, ki, is_fuzzy):
@@ -123,7 +136,7 @@ Kd = 1.4008
 # A = 1.5
 # B = 0.035
 Tp = 0.1
-tsin = 90
+tsin = 70
 N = int(tsin / Tp)
 
 a1 = 2.571
